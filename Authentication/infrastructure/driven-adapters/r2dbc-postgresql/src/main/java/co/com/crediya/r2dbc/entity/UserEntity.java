@@ -6,8 +6,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.time.LocalDate;
-
 @Table("users")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,10 +31,4 @@ public class UserEntity {
 
     @Column("base_salary")
     private Long baseSalary;
-
-    // CAMPOS NUEVOS
-    @Column("fecha_nacimiento")
-    private LocalDate fechaNacimiento;
-
-    private String direccion;
 }

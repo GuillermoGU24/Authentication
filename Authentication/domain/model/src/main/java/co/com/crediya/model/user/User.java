@@ -1,8 +1,6 @@
 package co.com.crediya.model.user;
 
 
-import java.time.LocalDate;
-
 public class User {
 
     private int idUser;
@@ -12,17 +10,12 @@ public class User {
     private String document;
     private String phone;
     private int idRol;
-    private Long baseSalary;
-
-    // CAMPOS NUEVOS AGREGADOS
-    private LocalDate fechaNacimiento;
-    private String direccion;
+    private Long baseSalary ;
 
     public User() {
     }
 
-    public User(int idUser, String name, String lastName, String email, String document,
-                String phone, int idRol, Long baseSalary, LocalDate fechaNacimiento, String direccion) {
+    public User(int idUser, String name, String lastName, String email, String document, String phone, int idRol, Long baseSalary) {
         this.idUser = idUser;
         this.name = name;
         this.lastName = lastName;
@@ -31,15 +24,8 @@ public class User {
         this.phone = phone;
         this.idRol = idRol;
         this.baseSalary = baseSalary;
-        this.fechaNacimiento = fechaNacimiento;
-        this.direccion = direccion;
     }
 
-    public void validateForRegistration() {
-        UserDomainValidator.validateForRegistration(this);
-    }
-
-    // Getters y setters existentes...
     public int getIdUser() {
         return idUser;
     }
@@ -102,22 +88,5 @@ public class User {
 
     public void setBaseSalary(Long baseSalary) {
         this.baseSalary = baseSalary;
-    }
-
-    // NUEVOS GETTERS Y SETTERS
-    public LocalDate getFechaNacimiento() {
-        return fechaNacimiento;
-    }
-
-    public void setFechaNacimiento(LocalDate fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
-    }
-
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
     }
 }
