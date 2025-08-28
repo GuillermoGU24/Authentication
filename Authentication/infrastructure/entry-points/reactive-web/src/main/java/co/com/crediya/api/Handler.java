@@ -2,9 +2,9 @@ package co.com.crediya.api;
 
 import co.com.crediya.api.dto.UserRequest;
 import co.com.crediya.api.mapper.UserMapper;
-import co.com.crediya.api.util.ValidationUtil;
+import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.registeruser.RegisterUserUseCase;
-import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,20 +16,26 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class Handler {
 
-
     private final RegisterUserUseCase registerUserUseCase;
     private final UserMapper userMapper;
-    private final jakarta.validation.Validator validator; // 👈 cambia a jakarta.validation.Validator
+    private final org.springframework.validation.Validator validator;
 
-    public Mono<ServerResponse>  listenSaveUser(ServerRequest serverRequest) {
+    public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserRequest.class)
-                .flatMap(req -> ValidationUtil.validate(req, validator))
+                .flatMap(req -> {
+                    var errors = new org.springframework.validation.BeanPropertyBindingResult(req, UserRequest.class.getName());
+                    validator.validate(req, errors);
+
+                    if (errors.hasErrors()) {
+                        return Mono.error(new IllegalArgumentException(errors.getAllErrors().get(0).getDefaultMessage()));
+                    }
+                    return Mono.just(req);
+                })
                 .doOnNext(req -> log.info("Petición recibida para registrar usuario con correo {}", req.getEmail()))
                 .map(userMapper::toDomain)
                 .flatMap(registerUserUseCase::save)
@@ -37,9 +43,12 @@ public class Handler {
                 .flatMap(saved -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(Map.of(
-                                "message", "Usuario creado exitosamente"
-                        )));
-
-
+                                "message", "Usuario creado exitosamente",
+                                "user", saved
+                        )))
+                .onErrorResume(e -> {
+                    log.error("Error en registro de usuario", e);
+                    return ServerResponse.badRequest().bodyValue(Map.of("error", e.getMessage()));
+                });
     }
 }
