@@ -13,16 +13,14 @@ public class User {
     private String phone;
     private int idRol;
     private Long baseSalary;
-
-    // CAMPOS NUEVOS AGREGADOS
-    private LocalDate fechaNacimiento;
-    private String direccion;
+    private LocalDate birthDate;
+    private String addres;
 
     public User() {
     }
 
     public User(int idUser, String name, String lastName, String email, String document,
-                String phone, int idRol, Long baseSalary, LocalDate fechaNacimiento, String direccion) {
+                String phone, int idRol, Long baseSalary, LocalDate birthDate, String addres) {
         this.idUser = idUser;
         this.name = name;
         this.lastName = lastName;
@@ -31,8 +29,8 @@ public class User {
         this.phone = phone;
         this.idRol = idRol;
         this.baseSalary = baseSalary;
-        this.fechaNacimiento = fechaNacimiento;
-        this.direccion = direccion;
+        this.birthDate = birthDate;
+        this.addres = addres;
     }
 
     public void validateForRegistration() {
@@ -104,20 +102,19 @@ public class User {
         this.baseSalary = baseSalary;
     }
 
-    // NUEVOS GETTERS Y SETTERS
-    public LocalDate getFechaNacimiento() {
-        return fechaNacimiento;
+    public LocalDate getBirthDate() {
+        return birthDate;
     }
 
-    public void setFechaNacimiento(LocalDate fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
     }
 
-    public String getDireccion() {
-        return direccion;
+    public String getAddress() {
+        return addres;
     }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
+    public void setAddress(String addres) {
+        this.addres = addres;
     }
 }

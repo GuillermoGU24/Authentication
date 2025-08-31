@@ -15,6 +15,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Crediya API")
                         .version("1.0")
-                        .description("Documentación de la API WebFlux"));
+                        .description("WebFlux API documentation"));
     }
+
 }

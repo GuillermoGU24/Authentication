@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@Order(-2) // Prioridad alta para manejar excepciones antes que otros handlers
+@Order(-2)
 @RequiredArgsConstructor
 public class GlobalExceptionHandler implements WebExceptionHandler {
 
@@ -49,12 +49,11 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             return handleIllegalArgument(exchange, (IllegalArgumentException) ex);
         }
 
-        // No manejamos otras excepciones, las dejamos pasar al siguiente handler
         return Mono.error(ex);
     }
 
     private Mono<Void> handleConstraintViolation(ServerWebExchange exchange, ConstraintViolationException ex) {
-        log.error("Error de validación de constraints: {}", ex.getMessage());
+        log.error("Constraint validation error: {}", ex.getMessage());
 
         List<Map<String, String>> details = ex.getConstraintViolations().stream()
                 .map(violation -> Map.of(
@@ -64,7 +63,8 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
                 .collect(Collectors.toList());
 
         Map<String, Object> errorResponse = Map.of(
-                "error", "Validación fallida",
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "error", "Validation failed",
                 "details", details
         );
 
@@ -72,17 +72,18 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
     }
 
     private Mono<Void> handleValidationErrors(ServerWebExchange exchange, WebExchangeBindException ex) {
-        log.error("Error de validación de binding: {}", ex.getMessage());
+        log.error("Binding validation error: {}", ex.getMessage());
 
         List<Map<String, String>> details = ex.getFieldErrors().stream()
                 .map(err -> Map.of(
                         "field", err.getField(),
-                        "message", err.getDefaultMessage() != null ? err.getDefaultMessage() : "Error de validación"
+                        "message", err.getDefaultMessage() != null ? err.getDefaultMessage() : "Validation error"
                 ))
                 .collect(Collectors.toList());
 
         Map<String, Object> errorResponse = Map.of(
-                "error", "Validación fallida",
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "error", "Validation failed",
                 "details", details
         );
 
@@ -90,26 +91,48 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
     }
 
     private Mono<Void> handleInvalidFormat(ServerWebExchange exchange, ServerWebInputException ex) {
-        log.error("Error de formato en input", ex);
+        log.error("Invalid input format", ex);
 
-        String fieldName = "campo";
-        String message = "Formato inválido";
+        String fieldName = "field";
+        String message = "Invalid format";
 
         Throwable cause = ex.getCause();
         if (cause instanceof InvalidFormatException ife) {
-            // Jackson trae la referencia al campo
             if (!ife.getPath().isEmpty()) {
                 fieldName = ife.getPath().get(0).getFieldName();
             }
-            message = String.format("El valor '%s' no es válido para el campo %s. Tipo esperado: %s",
+            message = String.format("Value '%s' is not valid for field %s. Expected type: %s",
                     ife.getValue(),
                     fieldName,
                     ife.getTargetType().getSimpleName());
         }
 
         Map<String, Object> errorResponse = Map.of(
-                "error", "Formato inválido en request",
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "error", "Invalid request format",
+                "details", List.of(Map.of("message", message))
+        );
+
+        return writeErrorResponse(exchange, HttpStatus.BAD_REQUEST, errorResponse);
+    }
+
+    private Mono<Void> handleIllegalArgument(ServerWebExchange exchange, IllegalArgumentException ex) {
+        log.error("Illegal argument error: {}", ex.getMessage());
+
+        String field = "general";
+        String message = ex.getMessage();
+
+        if (message != null && message.contains(":")) {
+            String[] parts = message.split(":", 2);
+            field = parts[0].trim();
+            message = parts[1].trim();
+        }
+
+        Map<String, Object> errorResponse = Map.of(
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "error", "Domain validation failed",
                 "details", List.of(Map.of(
+                        "field", field,
                         "message", message
                 ))
         );
@@ -117,20 +140,6 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         return writeErrorResponse(exchange, HttpStatus.BAD_REQUEST, errorResponse);
     }
 
-
-    private Mono<Void> handleIllegalArgument(ServerWebExchange exchange, IllegalArgumentException ex) {
-        log.error("Error de argumento ilegal: {}", ex.getMessage());
-
-        Map<String, Object> errorResponse = Map.of(
-                "error", "Validación de dominio fallida",
-                "details", List.of(Map.of(
-                        "field", "general",
-                        "message", ex.getMessage() != null ? ex.getMessage() : "Error de validación de dominio"
-                ))
-        );
-
-        return writeErrorResponse(exchange, HttpStatus.BAD_REQUEST, errorResponse);
-    }
 
     private Mono<Void> writeErrorResponse(ServerWebExchange exchange, HttpStatus status, Map<String, Object> errorResponse) {
         exchange.getResponse().setStatusCode(status);
@@ -143,7 +152,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
 
             return exchange.getResponse().writeWith(Mono.just(buffer));
         } catch (JsonProcessingException e) {
-            log.error("Error al serializar respuesta de error", e);
+            log.error("Error serializing error response", e);
             return exchange.getResponse().setComplete();
         }
     }

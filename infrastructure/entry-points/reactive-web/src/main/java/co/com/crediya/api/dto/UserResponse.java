@@ -17,8 +17,7 @@ public class UserResponse {
     private String phone;
     private int idRol;
     private Long baseSalary;
-
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fechaNacimiento;
-    private String direccion;
+    private LocalDate birthDate;
+    private String address;
 }
