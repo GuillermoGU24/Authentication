@@ -1,4 +1,6 @@
-package co.com.crediya.model.user;
+package co.com.crediya.model.user.exception;
+
+import co.com.crediya.model.user.User;
 
 import java.time.LocalDate;
 import java.time.Period;

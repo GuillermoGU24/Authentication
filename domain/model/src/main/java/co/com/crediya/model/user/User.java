@@ -1,6 +1,8 @@
 package co.com.crediya.model.user;
 
 
+import co.com.crediya.model.user.exception.UserDomainValidator;
+
 import java.time.LocalDate;
 
 public class User {

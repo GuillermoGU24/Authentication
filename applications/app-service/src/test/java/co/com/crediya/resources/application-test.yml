@@ -1,0 +1,22 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: "AuthenticationTest"
+  sql:
+    init:
+      mode: always
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/autenticacion_test
+    username: postgres
+    password: postgres
+
+adapter:
+  r2dbc:
+    host: "localhost"
+    port: 5432
+    database: "autenticacion_test"
+    schema: "public"
+    username: postgres
+    password: postgres

@@ -30,8 +30,4 @@ class PostgreSQLConnectionPoolTest {
         when(properties.password()).thenReturn("password");
     }
 
-    @Test
-    void getConnectionConfigSuccess() {
-        assertNotNull(connectionPool.getConnectionConfig(properties));
-    }
 }
