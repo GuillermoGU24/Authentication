@@ -7,16 +7,20 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class RegisterUserUseCase {
-
     private final UserRepository userRepository;
+
+    public Mono<Boolean> existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 
     public Mono<User> save(User user) {
         user.validateForRegistration();
-
-        return userRepository.existsByEmail(user.getEmail())
-                .filter(exists -> exists)
-                .flatMap(exists -> Mono.error(new IllegalArgumentException("email: Email is already registered")))
-                .cast(User.class)
-                .switchIfEmpty(userRepository.save(user));
+        return existsByEmail(user.getEmail())
+                .flatMap(exists -> {
+                    if (exists) {
+                        return Mono.error(new IllegalArgumentException("email: Email is already registered"));
+                    }
+                    return userRepository.save(user);
+                });
     }
 }
