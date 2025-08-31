@@ -30,14 +30,14 @@ public class Handler {
     public Mono<ServerResponse>  listenSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserRequest.class)
                 .flatMap(req -> ValidationUtil.validate(req, validator))
-                .doOnNext(req -> log.info("Petición recibida para registrar usuario con correo {}", req.getEmail()))
+                .doOnNext(req -> log.info("Request received to register user with email: {}", req.getEmail()))
                 .map(userMapper::toDomain)
                 .flatMap(registerUserUseCase::save)
                 .map(userMapper::toResponse)
                 .flatMap(saved -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(Map.of(
-                                "message", "Usuario creado exitosamente"
+                                "message", "User successfully created"
                         )));
 
 

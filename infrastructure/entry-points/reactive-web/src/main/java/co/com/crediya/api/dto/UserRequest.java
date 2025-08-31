@@ -1,6 +1,7 @@
 package co.com.crediya.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -9,42 +10,50 @@ import java.time.LocalDate;
 @Data
 public class UserRequest {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+    @Schema(description = "Nombre del usuario", example = "Juan")
     private String name;
 
-    @NotBlank(message = "El apellido es obligatorio")
-    @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres")
+    @NotBlank(message = "Last name is required")
+    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
+    @Schema(description = "Apellido del usuario", example = "Pérez")
     private String lastName;
 
-    @NotBlank(message = "El correo electrónico es obligatorio")
-    @Email(message = "El formato del correo electrónico es inválido")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    @Schema(description = "Correo electrónico", example = "juan.perez@email.com")
     private String email;
 
-    @NotBlank(message = "El documento de identidad es obligatorio")
-    @Pattern(regexp = "\\d{6,12}", message = "El documento debe contener entre 6 y 12 dígitos")
+    @NotBlank(message = "Document is required")
+    @Pattern(regexp = "\\d{6,12}", message = "Document must contain between 6 and 12 digits")
+    @Schema(description = "Documento de identidad", example = "123456789")
     private String document;
 
-    @NotBlank(message = "El teléfono es obligatorio")
-    @Pattern(regexp = "^[0-9+\\-\\s]{7,15}$", message = "El formato del teléfono es inválido")
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^[0-9+\\-\\s]{7,15}$", message = "Invalid phone format")
+    @Schema(description = "Teléfono de contacto", example = "3001234567")
     private String phone;
 
-    @NotNull(message = "El rol es obligatorio")
-    @Min(value = 1, message = "El rol debe ser mayor a 0")
+    @NotNull(message = "Role ID is required")
+    @Min(value = 1, message = "Role ID must be greater than 0")
+    @Schema(description = "ID del rol", example = "1")
     private Integer idRol;
 
-    @NotNull(message = "El salario base es obligatorio")
-    @Min(value = 0, message = "El salario base no puede ser negativo")
-    @Max(value = 15000000, message = "El salario base no puede exceder 15,000,000")
+    @NotNull(message = "Base salary is required")
+    @Min(value = 0, message = "Base salary cannot be negative")
+    @Max(value = 15000000, message = "Base salary cannot exceed 15,000,000")
+    @Schema(description = "Salario base", example = "1500000")
     private Long baseSalary;
 
-    // CAMPOS NUEVOS
-    @NotNull(message = "La fecha de nacimiento es obligatoria")
-    @Past(message = "La fecha de nacimiento debe ser anterior a la fecha actual")
+    @NotNull(message = "Birthdate is required")
+    @Past(message = "Birthdate must be in the past")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fechaNacimiento;
+    @Schema(description = "Fecha de nacimiento (yyyy-MM-dd)", example = "1990-05-15")
+    private LocalDate birthDate;
 
-    @NotBlank(message = "La dirección es obligatoria")
-    @Size(min = 10, max = 200, message = "La dirección debe tener entre 10 y 200 caracteres")
-    private String direccion;
+    @NotBlank(message = "Address is required")
+    @Size(min = 10, max = 200, message = "Address must be between 10 and 200 characters")
+    @Schema(description = "Dirección de residencia", example = "Calle 123 #45-67")
+    private String address;
 }

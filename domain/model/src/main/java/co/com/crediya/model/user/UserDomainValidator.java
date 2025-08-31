@@ -13,79 +13,77 @@ public class UserDomainValidator {
             Pattern.compile("^[0-9+\\-\\s]{7,15}$");
 
     public static void validateForRegistration(User user) {
-        validateName(user.getName(), "nombre");
-        validateName(user.getLastName(), "apellido");
+        validateName(user.getName(), "name");
+        validateName(user.getLastName(), "last name");
         validateEmail(user.getEmail());
         validateSalary(user.getBaseSalary());
         validatePhone(user.getPhone());
-        validateBirthDate(user.getFechaNacimiento());
-        validateAddress(user.getDireccion());
+        validateBirthDate(user.getBirthDate());
+        validateAddress(user.getAddress());
     }
 
     private static void validateName(String name, String fieldName) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("El " + fieldName + " es obligatorio");
+            throw new IllegalArgumentException(fieldName + " is required");
         }
         if (name.trim().length() < 2 || name.trim().length() > 50) {
-            throw new IllegalArgumentException("El " + fieldName + " debe tener entre 2 y 50 caracteres");
+            throw new IllegalArgumentException(fieldName + " must be between 2 and 50 characters");
         }
     }
 
     private static void validateEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("El correo electrónico es obligatorio");
+            throw new IllegalArgumentException("Email is required");
         }
         if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new IllegalArgumentException("El formato del correo electrónico es inválido");
+            throw new IllegalArgumentException("Invalid email format");
         }
     }
 
     private static void validateSalary(Long salary) {
         if (salary == null) {
-            throw new IllegalArgumentException("El salario base es obligatorio");
+            throw new IllegalArgumentException("Base salary is required");
         }
         if (salary < 0) {
-            throw new IllegalArgumentException("El salario base no puede ser negativo");
+            throw new IllegalArgumentException("Base salary cannot be negative");
         }
         if (salary > 15000000) {
-            throw new IllegalArgumentException("El salario base no puede exceder $15,000,000");
+            throw new IllegalArgumentException("Base salary cannot exceed 15,000,000");
         }
     }
 
     private static void validatePhone(String phone) {
         if (phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException("El teléfono es obligatorio");
+            throw new IllegalArgumentException("Phone number is required");
         }
         if (!PHONE_PATTERN.matcher(phone).matches()) {
-            throw new IllegalArgumentException("El formato del teléfono es inválido");
+            throw new IllegalArgumentException("Invalid phone format");
         }
     }
 
     private static void validateBirthDate(LocalDate birthDate) {
         if (birthDate == null) {
-            throw new IllegalArgumentException("La fecha de nacimiento es obligatoria");
+            throw new IllegalArgumentException("Birthdate is required");
         }
         if (birthDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("La fecha de nacimiento no puede ser futura");
+            throw new IllegalArgumentException("Birthdate cannot be in the future");
         }
 
         int age = Period.between(birthDate, LocalDate.now()).getYears();
         if (age < 18) {
-            throw new IllegalArgumentException("El usuario debe ser mayor de edad (18 años)");
+            throw new IllegalArgumentException("User must be at least 18 years old");
         }
         if (age > 100) {
-            throw new IllegalArgumentException("La edad no puede ser superior a 100 años");
+            throw new IllegalArgumentException("Age cannot exceed 100 years");
         }
     }
 
     private static void validateAddress(String address) {
         if (address == null || address.trim().isEmpty()) {
-            throw new IllegalArgumentException("La dirección es obligatoria");
+            throw new IllegalArgumentException("Address is required");
         }
         if (address.trim().length() < 10 || address.trim().length() > 200) {
-            throw new IllegalArgumentException("La dirección debe tener entre 10 y 200 caracteres");
+            throw new IllegalArgumentException("Address must be between 10 and 200 characters");
         }
     }
-
 }
-

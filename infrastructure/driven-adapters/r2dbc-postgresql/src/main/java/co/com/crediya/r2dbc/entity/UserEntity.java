@@ -8,7 +8,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDate;
 
-@Table("users")
+@Table("usuario")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -16,27 +16,33 @@ import java.time.LocalDate;
 @Builder
 public class UserEntity {
     @Id
-    @Column("id_user")
+    @Column("id_usuario")
     private int idUser;
 
+    @Column("nombre")
     private String name;
 
-    @Column("last_name")
+    @Column("apellido")
     private String lastName;
 
     private String email;
+
+    @Column("documento_identidad")
     private String document;
+
+    @Column("telefono")
     private String phone;
 
     @Column("id_rol")
     private int idRol;
 
-    @Column("base_salary")
+    @Column("salario_base")
     private Long baseSalary;
 
     // CAMPOS NUEVOS
     @Column("fecha_nacimiento")
-    private LocalDate fechaNacimiento;
+    private LocalDate birthDate;
 
-    private String direccion;
+    @Column("direccion")
+    private String address;
 }
