@@ -23,4 +23,9 @@ public class RegisterUserUseCase {
                     return userRepository.save(user);
                 });
     }
+
+    public Mono<User> findByDocument(String document) {
+        return userRepository.findByDocument(document);
+    }
+
 }

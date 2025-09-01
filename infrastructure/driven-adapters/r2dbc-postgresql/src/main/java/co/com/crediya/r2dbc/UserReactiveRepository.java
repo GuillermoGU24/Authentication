@@ -9,4 +9,7 @@ import reactor.core.publisher.Mono;
 public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntity, String>, ReactiveQueryByExampleExecutor<UserEntity> {
     @Query("SELECT EXISTS (SELECT 1 FROM usuario WHERE email = :email)")
     Mono<Boolean> existsByEmail(String email);
+
+    @Query("SELECT * FROM usuario WHERE documento_identidad = :document")
+    Mono<UserEntity> findByDocument(String document);
 }
