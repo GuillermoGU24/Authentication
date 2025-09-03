@@ -3,6 +3,7 @@ package exception;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,15 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             return handleIllegalArgument(exchange, (IllegalArgumentException) ex);
         }
 
+
+        if (ex instanceof org.springframework.dao.DuplicateKeyException dke) {
+            return handleDuplicateKey(exchange, dke);
+        }
+
+
         return Mono.error(ex);
     }
+
 
     private Mono<Void> handleConstraintViolation(ServerWebExchange exchange, ConstraintViolationException ex) {
         log.error("Constraint validation error: {}", ex.getMessage());
@@ -140,20 +148,51 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         return writeErrorResponse(exchange, HttpStatus.BAD_REQUEST, errorResponse);
     }
 
+    private Mono<Void> handleDuplicateKey(ServerWebExchange exchange,
+                                          org.springframework.dao.DuplicateKeyException ex) {
+        log.error("Duplicate key error: {}", ex.getMessage());
+
+        String field = "general";
+        String message = "Duplicate key violation";
+
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("usuario_documento_key")) {
+                field = "document";
+                message = "Document is already registered";
+            } else if (ex.getMessage().contains("usuario_email_key")) {
+                field = "email";
+                message = "Email is already registered";
+            }
+        }
+
+        Map<String, Object> errorResponse = Map.of(
+                "status", HttpStatus.CONFLICT.value(),
+                "error", "Data integrity violation",
+                "details", List.of(Map.of(
+                        "field", field,
+                        "message", message
+                ))
+        );
+
+        return writeErrorResponse(exchange, HttpStatus.CONFLICT, errorResponse);
+    }
+
 
     private Mono<Void> writeErrorResponse(ServerWebExchange exchange, HttpStatus status, Map<String, Object> errorResponse) {
         exchange.getResponse().setStatusCode(status);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
-        try {
-            String jsonResponse = objectMapper.writeValueAsString(errorResponse);
-            DataBuffer buffer = exchange.getResponse().bufferFactory()
-                    .wrap(jsonResponse.getBytes(StandardCharsets.UTF_8));
-
-            return exchange.getResponse().writeWith(Mono.just(buffer));
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing error response", e);
-            return exchange.getResponse().setComplete();
-        }
+        return exchange.getResponse().writeWith(
+                Mono.fromSupplier(() -> {
+                    try {
+                        byte[] bytes = objectMapper.writeValueAsBytes(errorResponse);
+                        return exchange.getResponse().bufferFactory().wrap(bytes);
+                    } catch (JsonProcessingException e) {
+                        log.error("Error serializing error response", e);
+                        return exchange.getResponse().bufferFactory()
+                                .wrap("{\"status\":500,\"error\":\"Internal Server Error\"}".getBytes(StandardCharsets.UTF_8));
+                    }
+                })
+        );
     }
+
 }
