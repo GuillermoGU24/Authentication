@@ -33,3 +33,7 @@ adapter:
     schema: "public"
     username: postgres
     password: postgres
+
+jwt:
+  secret-base64: ${JWT_SECRET_BASE64:VGhpcy1pcy1hLWRlZmF1bHQtc2VjcmV0LWtleS1iYXNlNjQ=}
+  ttl-seconds: 3600
