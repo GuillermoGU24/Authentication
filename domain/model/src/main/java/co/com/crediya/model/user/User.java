@@ -1,6 +1,10 @@
 package co.com.crediya.model.user;
 
 
+import co.com.crediya.model.user.exception.UserDomainValidator;
+
+import java.time.LocalDate;
+
 public class User {
 
     private int idUser;
@@ -10,12 +14,15 @@ public class User {
     private String document;
     private String phone;
     private int idRol;
-    private Long baseSalary ;
+    private Long baseSalary;
+    private LocalDate birthDate;
+    private String addres;
 
     public User() {
     }
 
-    public User(int idUser, String name, String lastName, String email, String document, String phone, int idRol, Long baseSalary) {
+    public User(int idUser, String name, String lastName, String email, String document,
+                String phone, int idRol, Long baseSalary, LocalDate birthDate, String addres) {
         this.idUser = idUser;
         this.name = name;
         this.lastName = lastName;
@@ -24,8 +31,15 @@ public class User {
         this.phone = phone;
         this.idRol = idRol;
         this.baseSalary = baseSalary;
+        this.birthDate = birthDate;
+        this.addres = addres;
     }
 
+    public void validateForRegistration() {
+        UserDomainValidator.validateForRegistration(this);
+    }
+
+    // Getters y setters existentes...
     public int getIdUser() {
         return idUser;
     }
@@ -88,5 +102,21 @@ public class User {
 
     public void setBaseSalary(Long baseSalary) {
         this.baseSalary = baseSalary;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getAddress() {
+        return addres;
+    }
+
+    public void setAddress(String addres) {
+        this.addres = addres;
     }
 }

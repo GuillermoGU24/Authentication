@@ -7,20 +7,25 @@ import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class RegisterUserUseCase {
-
     private final UserRepository userRepository;
 
+    public Mono<Boolean> existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
     public Mono<User> save(User user) {
-        if (user.getBaseSalary() == null ||
-                user.getBaseSalary() < 0 || user.getBaseSalary() > 15000000) {
-            return Mono.error(new IllegalArgumentException("El salario está fuera del rango permitido"));
-        }
-        return userRepository.existsByEmail(user.getEmail())
+        user.validateForRegistration();
+        return existsByEmail(user.getEmail())
                 .flatMap(exists -> {
                     if (exists) {
-                        return Mono.error(new IllegalArgumentException("Correo ya registrado"));
+                        return Mono.error(new IllegalArgumentException("email: Email is already registered"));
                     }
                     return userRepository.save(user);
                 });
     }
+
+    public Mono<User> findByDocument(String document) {
+        return userRepository.findByDocument(document);
+    }
+
 }
