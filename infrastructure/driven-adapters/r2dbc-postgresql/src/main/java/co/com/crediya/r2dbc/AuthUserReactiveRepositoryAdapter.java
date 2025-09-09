@@ -1,7 +1,7 @@
 package co.com.crediya.r2dbc;
 
+import co.com.crediya.model.Rol.Rol;
 import co.com.crediya.model.auth.AuthUser;
-import co.com.crediya.model.auth.Rol;
 import co.com.crediya.model.auth.gateways.AuthUserRepository;
 import co.com.crediya.r2dbc.entity.AuthUserEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
@@ -40,11 +40,7 @@ public class AuthUserReactiveRepositoryAdapter extends ReactiveAdapterOperations
         d.setEmail(e.getEmail());
         d.setPasswordHash(e.getPasswordHash());
         d.setDocument(e.getDocument());
-        d.setRol(switch (e.getIdRol()) {
-            case 1 -> Rol.ADMIN;
-            case 2 -> Rol.ASESOR;
-            default -> Rol.CLIENTE;
-        });
+        d.setRol(new Rol(e.getIdRol(), e.getRolName(), e.getRolDescription()));
         return d;
     }
 }

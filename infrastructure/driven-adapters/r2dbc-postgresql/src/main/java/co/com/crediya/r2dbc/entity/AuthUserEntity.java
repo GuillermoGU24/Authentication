@@ -20,6 +20,10 @@ public class AuthUserEntity {
     private String passwordHash;
     @Column("id_rol")
     private Integer idRol; // 1=ADMIN,2=ASESOR,3=CLIENTE
+    @Column("rol_nombre")
+    private String rolName;
+    @Column("rol_descripcion")
+    private String rolDescription;
     @Column("documento_identidad")
     private String document;
 }

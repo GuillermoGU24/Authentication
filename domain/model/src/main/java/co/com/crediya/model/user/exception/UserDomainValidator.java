@@ -22,6 +22,7 @@ public class UserDomainValidator {
         validatePhone(user.getPhone());
         validateBirthDate(user.getBirthDate());
         validateAddress(user.getAddress());
+        validateRole(user.getIdRol());
     }
 
     private static void validateName(String name, String fieldName) {
@@ -77,6 +78,12 @@ public class UserDomainValidator {
         }
         if (age > 100) {
             throw new IllegalArgumentException("Age cannot exceed 100 years");
+        }
+    }
+
+    private static void validateRole(Integer idRol) {
+        if (idRol == null || idRol <= 0) {
+            throw new IllegalArgumentException("Role is required and must be valid");
         }
     }
 

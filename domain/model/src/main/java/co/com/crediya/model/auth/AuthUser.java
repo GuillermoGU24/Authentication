@@ -1,6 +1,7 @@
 package co.com.crediya.model.auth;
 
 
+import co.com.crediya.model.Rol.Rol;
 
 public class AuthUser {
     private Integer idUser;

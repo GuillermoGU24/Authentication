@@ -1,7 +1,7 @@
 package co.com.crediya.r2dbc.jwt;
 
+import co.com.crediya.model.Rol.Rol;
 import co.com.crediya.model.auth.AuthUser;
-import co.com.crediya.model.auth.Rol;
 import co.com.crediya.model.auth.gateways.TokenService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -31,7 +31,8 @@ public class TokenServiceJwt implements TokenService {
                 .addClaims(Map.of(
                         "uid", user.getIdUser(),
                         "email", user.getEmail(),
-                        "rol", user.getRol().name()
+                        "rolId", user.getRol().getId(),
+                        "rolNombre", user.getRol().getName()
                 ))
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
@@ -40,18 +41,34 @@ public class TokenServiceJwt implements TokenService {
     @Override
     public AuthUser validate(String token) {
         try {
-            Jws<Claims> jws = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+            Jws<Claims> jws = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+
             Claims c = jws.getPayload();
+
             AuthUser u = new AuthUser();
             u.setIdUser(((Number) c.get("uid")).intValue());
             u.setEmail((String) c.get("email"));
             u.setDocument(c.getSubject());
-            u.setRol(Rol.valueOf((String) c.get("rol")));
+
+            // Manejo defensivo del rol
+            Number rolId = (Number) c.get("rolId");
+            String rolNombre = (String) c.get("rolNombre");
+
+            if (rolId != null && rolNombre != null) {
+                u.setRol(new Rol(rolId.intValue(), rolNombre, null));
+            } else {
+                throw new IllegalArgumentException("authorization: Token does not contain role information");
+            }
+
             return u;
         } catch (JwtException e) {
             throw new IllegalArgumentException("authorization: Invalid or expired token");
         }
     }
+
 
     public static SecretKey keyFrom(String base64) {
         return Keys.hmacShaKeyFor(io.jsonwebtoken.io.Decoders.BASE64.decode(base64));

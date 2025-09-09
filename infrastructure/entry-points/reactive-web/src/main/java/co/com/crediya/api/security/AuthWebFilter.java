@@ -2,7 +2,6 @@ package co.com.crediya.api.security;// co.com.crediya.security.AuthWebFilter.jav
 
 
 import co.com.crediya.model.auth.AuthUser;
-import co.com.crediya.model.auth.Rol;
 import co.com.crediya.model.auth.gateways.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +39,19 @@ public class AuthWebFilter implements WebFilter {
 
         String token = auth.substring("Bearer ".length());
         AuthUser user;
-        try { user = tokenService.validate(token); }
-        catch (IllegalArgumentException e) { return unauthorized(exchange, e.getMessage()); }
+        try {
+            user = tokenService.validate(token);
+        } catch (IllegalArgumentException e) {
+            return unauthorized(exchange, e.getMessage());
+        }
 
         exchange.getAttributes().put("authUser", user);
 
         if (path.startsWith("/api/v1/usuarios")) {
-            if (!(user.getRol() == Rol.ADMIN || user.getRol() == Rol.ASESOR))
+            if (!(user.getRol().getName().equalsIgnoreCase("ADMIN")
+                    || user.getRol().getName().equalsIgnoreCase("ASESOR"))) {
                 return forbidden(exchange, "forbidden: Requires ADMIN or ASESOR");
+            }
         }
         return chain.filter(exchange);
     }
