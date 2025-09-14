@@ -36,10 +36,15 @@ public class UserEntity {
     @Column("id_rol")
     private int idRol;
 
+    @Column("rol_nombre")
+    private String rolName;
+
+    @Column("rol_descripcion")
+    private String rolDescription;
+
     @Column("salario_base")
     private Long baseSalary;
 
-    // CAMPOS NUEVOS
     @Column("fecha_nacimiento")
     private LocalDate birthDate;
 

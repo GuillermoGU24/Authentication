@@ -22,9 +22,9 @@ public class AuthWebFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-
         String path = exchange.getRequest().getPath().value();
 
+        // Endpoints públicos
         if (path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-ui")
                 || path.equals("/swagger-ui.html")
@@ -32,29 +32,34 @@ public class AuthWebFilter implements WebFilter {
                 || path.startsWith("/api/v1/login")) {
             return chain.filter(exchange);
         }
+
+        // Header de autorización
         String auth = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (auth == null || !auth.startsWith("Bearer ")) {
             return unauthorized(exchange, "authorization: Missing Bearer token");
         }
 
         String token = auth.substring("Bearer ".length());
-        AuthUser user;
-        try {
-            user = tokenService.validate(token);
-        } catch (IllegalArgumentException e) {
-            return unauthorized(exchange, e.getMessage());
-        }
 
-        exchange.getAttributes().put("authUser", user);
+        return tokenService.validate(token) // devuelve Mono<AuthUser>
+                .flatMap(user -> {
+                    // Guardar el usuario en el exchange
+                    exchange.getAttributes().put("authUser", user);
 
-        if (path.startsWith("/api/v1/usuarios")) {
-            if (!(user.getRol().getName().equalsIgnoreCase("ADMIN")
-                    || user.getRol().getName().equalsIgnoreCase("ASESOR"))) {
-                return forbidden(exchange, "forbidden: Requires ADMIN or ASESOR");
-            }
-        }
-        return chain.filter(exchange);
+                    // Validar roles para /usuarios
+                    if (path.startsWith("/api/v1/usuarios")) {
+                        if (!(user.getRol().getName().equalsIgnoreCase("ADMIN")
+                                || user.getRol().getName().equalsIgnoreCase("ASESOR"))) {
+                            return forbidden(exchange, "forbidden: Requires ADMIN or ASESOR");
+                        }
+                    }
+
+                    // continuar el flujo normal
+                    return chain.filter(exchange);
+                })
+                .onErrorResume(e -> unauthorized(exchange, e.getMessage()));
     }
+
 
     private Mono<Void> unauthorized(ServerWebExchange ex, String msg) {
         ex.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

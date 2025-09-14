@@ -5,12 +5,18 @@ public class Rol {
     private String nameRol;
     private String decriptionRol;
 
-    public Rol() {}
+    public Rol() {
+    }
 
     public Rol(Integer idRol, String nameRol, String decriptionRol) {
         this.idRol = idRol;
         this.nameRol = nameRol;
         this.decriptionRol = decriptionRol;
+    }
+
+    public Rol(Integer idRol, String nameRol) {
+        this.idRol = idRol;
+        this.nameRol = nameRol;
     }
 
     public Integer getId() {

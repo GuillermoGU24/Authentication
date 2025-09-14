@@ -22,7 +22,7 @@ public class UserDomainValidator {
         validatePhone(user.getPhone());
         validateBirthDate(user.getBirthDate());
         validateAddress(user.getAddress());
-        validateRole(user.getIdRol());
+        validateRole(user.getRol().getId());
     }
 
     private static void validateName(String name, String fieldName) {

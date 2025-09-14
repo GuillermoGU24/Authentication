@@ -17,8 +17,8 @@ public class RolEntity {
     private Integer rolId;
 
     @Column("nombre")
-    private String rolNombre;
+    private String rolName;
 
     @Column("descripcion")
-    private String rolDescripcion;
+    private String rolDescription;
 }

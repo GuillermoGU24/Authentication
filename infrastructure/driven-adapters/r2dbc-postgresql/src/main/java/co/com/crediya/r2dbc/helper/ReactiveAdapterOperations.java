@@ -1,5 +1,6 @@
 package co.com.crediya.r2dbc.helper;
 
+import co.com.crediya.model.auth.AuthUser;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.domain.Example;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;

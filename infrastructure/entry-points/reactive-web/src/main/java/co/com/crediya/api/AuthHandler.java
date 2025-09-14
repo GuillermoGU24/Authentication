@@ -3,6 +3,8 @@ package co.com.crediya.api;
 import co.com.crediya.api.dto.LoginRequest;
 import co.com.crediya.api.dto.LoginResponse;
 import co.com.crediya.api.util.ValidationUtil;
+
+import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.login.LoginUseCase;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -33,4 +35,16 @@ public class AuthHandler {
                         .token(token).tokenType("Bearer").expiresIn(ttlSeconds).build())
                 .flatMap(res -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(res));
     }
+
+
+    public Mono<ServerResponse> me(ServerRequest req) {
+        User user = (User) req.exchange().getAttributes().get("authUser");
+        if (user == null) {
+            return ServerResponse.status(401).build();
+        }
+        return ServerResponse.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(user);
+    }
+
 }

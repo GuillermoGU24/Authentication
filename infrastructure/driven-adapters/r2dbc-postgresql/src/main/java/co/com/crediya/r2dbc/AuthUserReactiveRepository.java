@@ -8,12 +8,12 @@ import reactor.core.publisher.Mono;
 
 public interface AuthUserReactiveRepository extends ReactiveCrudRepository<AuthUserEntity, Integer>, ReactiveQueryByExampleExecutor<AuthUserEntity> {
     @Query("""
-    SELECT u.id_usuario, u.email, u.clave_hash, u.documento_identidad, u.id_rol,
-           r.nombre as rol_nombre, r.descripcion as rol_descripcion
-    FROM usuario u
-    INNER JOIN rol r ON u.id_rol = r.id_rol
-    WHERE u.email = :email
-    """)
+            SELECT u.id_usuario, u.email, u.clave_hash, u.documento_identidad, u.id_rol,
+                   r.nombre as rol_nombre, r.descripcion as rol_descripcion
+            FROM usuario u
+            INNER JOIN rol r ON u.id_rol = r.id_rol
+            WHERE u.email = :email
+            """)
     Mono<AuthUserEntity> findByEmail(String email);
 
 }

@@ -26,4 +26,5 @@ public class AuthUserEntity {
     private String rolDescription;
     @Column("documento_identidad")
     private String document;
+
 }

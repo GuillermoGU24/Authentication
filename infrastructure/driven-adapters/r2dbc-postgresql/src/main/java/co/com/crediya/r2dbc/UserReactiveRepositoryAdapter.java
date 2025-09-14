@@ -1,5 +1,7 @@
 package co.com.crediya.r2dbc;
 
+import co.com.crediya.model.Rol.Rol;
+import co.com.crediya.model.auth.AuthUser;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.UserRepository;
 import co.com.crediya.r2dbc.entity.UserEntity;
@@ -37,11 +39,31 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     public Mono<Boolean> existsByEmail(String email) {
         return repository.existsByEmail(email);
     }
-
     @Override
     public Mono<User> findByDocument(String document) {
         return repository.findByDocument(document)
                 .map(this::toEntity)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("document: User not found")));
     }
+
+    @Override
+    public Mono<User> findAuthUserById(Integer id) {
+        return repository.findUserWithRolById(id)
+                .map(entity -> {
+                    Rol rol = new Rol(entity.getIdRol(), entity.getRolName(), entity.getRolDescription());
+                    User user = new User();
+                    user.setIdUser(entity.getIdUser());
+                    user.setName(entity.getName());
+                    user.setLastName(entity.getLastName());
+                    user.setEmail(entity.getEmail());
+                    user.setDocument(entity.getDocument());
+                    user.setPhone(entity.getPhone());
+                    user.setBaseSalary(entity.getBaseSalary());
+                    user.setBirthDate(entity.getBirthDate());
+                    user.setAddress(entity.getAddress());
+                    user.setRol(rol);
+                    return user;
+                });
+    }
+
 }

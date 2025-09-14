@@ -1,6 +1,7 @@
 package co.com.crediya.model.user;
 
 
+import co.com.crediya.model.Rol.Rol;
 import co.com.crediya.model.user.exception.UserDomainValidator;
 
 import java.time.LocalDate;
@@ -13,26 +14,28 @@ public class User {
     private String email;
     private String document;
     private String phone;
-    private int idRol;
+    private Rol rol;
     private Long baseSalary;
     private LocalDate birthDate;
-    private String addres;
+    private String address;
 
     public User() {
+       ;
     }
 
     public User(int idUser, String name, String lastName, String email, String document,
-                String phone, int idRol, Long baseSalary, LocalDate birthDate, String addres) {
+                String phone, Rol rol, Long baseSalary, LocalDate birthDate, String address) {
         this.idUser = idUser;
         this.name = name;
         this.lastName = lastName;
         this.email = email;
         this.document = document;
         this.phone = phone;
-        this.idRol = idRol;
+        this.rol = rol;
+
         this.baseSalary = baseSalary;
         this.birthDate = birthDate;
-        this.addres = addres;
+        this.address = address;
     }
 
     public void validateForRegistration() {
@@ -42,6 +45,22 @@ public class User {
     // Getters y setters existentes...
     public int getIdUser() {
         return idUser;
+    }
+
+    public Rol getRol() {
+        return rol;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void setIdUser(int idUser) {
@@ -88,13 +107,7 @@ public class User {
         this.phone = phone;
     }
 
-    public int getIdRol() {
-        return idRol;
-    }
 
-    public void setIdRol(int idRol) {
-        this.idRol = idRol;
-    }
 
     public Long getBaseSalary() {
         return baseSalary;
@@ -112,11 +125,4 @@ public class User {
         this.birthDate = birthDate;
     }
 
-    public String getAddress() {
-        return addres;
-    }
-
-    public void setAddress(String addres) {
-        this.addres = addres;
-    }
 }

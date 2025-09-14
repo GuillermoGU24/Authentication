@@ -1,10 +1,12 @@
 package co.com.crediya.r2dbc.jwt;
 
-import co.com.crediya.model.Rol.Rol;
 import co.com.crediya.model.auth.AuthUser;
 import co.com.crediya.model.auth.gateways.TokenService;
+import co.com.crediya.model.user.User;
+import co.com.crediya.model.user.gateways.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
@@ -15,57 +17,52 @@ public class TokenServiceJwt implements TokenService {
 
     private final SecretKey key;
     private final long ttlSeconds;
+    private final UserRepository userRepository;
 
-    public TokenServiceJwt(SecretKey key, long ttlSeconds) {
+    public TokenServiceJwt(SecretKey key, long ttlSeconds, UserRepository userRepository) {
         this.key = key;
         this.ttlSeconds = ttlSeconds;
+
+        this.userRepository = userRepository;
     }
 
     @Override
     public String generate(AuthUser user) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(user.getDocument())
+                .setSubject(user.getIdUser().toString()) // aquí va el UUID
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(ttlSeconds)))
                 .addClaims(Map.of(
-                        "uid", user.getIdUser(),
                         "email", user.getEmail(),
                         "rolId", user.getRol().getId(),
-                        "rolNombre", user.getRol().getName()
+                        "rolName", user.getRol().getName()
                 ))
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
+
     @Override
-    public AuthUser validate(String token) {
+    public Mono<User> validate(String token) {
+        if (token == null || token.isBlank()) {
+            return Mono.error(new IllegalArgumentException("authorization: Missing token"));
+        }
+
         try {
             Jws<Claims> jws = Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
 
-            Claims c = jws.getPayload();
+            String subject = jws.getPayload().getSubject();
+            Integer id = Integer.valueOf(subject);
 
-            AuthUser u = new AuthUser();
-            u.setIdUser(((Number) c.get("uid")).intValue());
-            u.setEmail((String) c.get("email"));
-            u.setDocument(c.getSubject());
+            return userRepository.findAuthUserById(id)
+                    .switchIfEmpty(Mono.error(new IllegalArgumentException("User not found")));
 
-            // Manejo defensivo del rol
-            Number rolId = (Number) c.get("rolId");
-            String rolNombre = (String) c.get("rolNombre");
-
-            if (rolId != null && rolNombre != null) {
-                u.setRol(new Rol(rolId.intValue(), rolNombre, null));
-            } else {
-                throw new IllegalArgumentException("authorization: Token does not contain role information");
-            }
-
-            return u;
         } catch (JwtException e) {
-            throw new IllegalArgumentException("authorization: Invalid or expired token");
+            return Mono.error(new IllegalArgumentException("authorization: Invalid or expired token"));
         }
     }
 

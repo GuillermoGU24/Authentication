@@ -18,7 +18,7 @@ public class RegisterUserUseCase {
     public Mono<User> save(User user) {
         user.validateForRegistration();
 
-        return rolRepository.findById(user.getIdRol())
+        return rolRepository.findById(user.getRol().getId())
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("role: Role does not exist")))
                 .then(existsByEmail(user.getEmail()))
                 .flatMap(exists -> {
@@ -31,6 +31,10 @@ public class RegisterUserUseCase {
 
     public Mono<User> findByDocument(String document) {
         return userRepository.findByDocument(document);
+    }
+
+    public Mono<User> findAuthUserById(Integer id) {
+        return userRepository.findAuthUserById(id);
     }
 
 }

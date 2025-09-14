@@ -23,7 +23,7 @@ public class AuthUserReactiveRepositoryAdapter extends ReactiveAdapterOperations
     public AuthUserReactiveRepositoryAdapter(AuthUserReactiveRepository repository,
                                              ObjectMapper mapper,
                                              TransactionalOperator tx) {
-        super(repository, mapper, entity -> toDomain(entity));
+        super(repository, mapper, AuthUserReactiveRepositoryAdapter::toDomain);
         this.tx = tx;
     }
 
@@ -33,7 +33,7 @@ public class AuthUserReactiveRepositoryAdapter extends ReactiveAdapterOperations
                 .map(AuthUserReactiveRepositoryAdapter::toDomain)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("credentials: User not found")));
     }
-
+    
     private static AuthUser toDomain(AuthUserEntity e) {
         AuthUser d = new AuthUser();
         d.setIdUser(e.getIdUser());

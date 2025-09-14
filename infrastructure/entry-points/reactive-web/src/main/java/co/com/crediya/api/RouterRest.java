@@ -82,7 +82,6 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/usuarios"), handler::listenSaveUser)
                 .andRoute(GET("/api/v1/usuarios/document/{document}"), handler::listenGetUserByDocument);
-
     }
 
 

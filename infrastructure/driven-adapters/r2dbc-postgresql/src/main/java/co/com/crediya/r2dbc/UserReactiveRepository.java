@@ -1,5 +1,6 @@
 package co.com.crediya.r2dbc;
 
+import co.com.crediya.r2dbc.entity.AuthUserEntity;
 import co.com.crediya.r2dbc.entity.UserEntity;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
@@ -12,4 +13,23 @@ public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntit
 
     @Query("SELECT * FROM usuario WHERE documento_identidad = :document")
     Mono<UserEntity> findByDocument(String document);
+
+    @Query("""
+    SELECT u.id_usuario,
+           u.email,
+           u.nombre,
+           u.apellido,
+           u.documento_identidad,
+           u.telefono,
+           u.salario_base,
+           u.fecha_nacimiento,
+           u.direccion,
+           u.id_rol,
+           r.nombre as rol_nombre,
+           r.descripcion as rol_descripcion
+    FROM usuario u
+    INNER JOIN rol r ON u.id_rol = r.id_rol
+    WHERE u.id_usuario = :id
+    """)
+    Mono<UserEntity> findUserWithRolById(Integer id);
 }

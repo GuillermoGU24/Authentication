@@ -1,8 +1,11 @@
 package co.com.crediya.api;
 
 import co.com.crediya.api.dto.UserRequest;
+import co.com.crediya.api.dto.UserResponse;
 import co.com.crediya.api.mapper.UserMapper;
 import co.com.crediya.api.util.ValidationUtil;
+import co.com.crediya.model.auth.AuthUser;
+import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.registeruser.RegisterUserUseCase;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
