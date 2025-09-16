@@ -41,12 +41,10 @@ public class AuthWebFilter implements WebFilter {
 
         String token = auth.substring("Bearer ".length());
 
-        return tokenService.validate(token) // devuelve Mono<AuthUser>
+        return tokenService.validate(token)
                 .flatMap(user -> {
-                    // Guardar el usuario en el exchange
                     exchange.getAttributes().put("authUser", user);
 
-                    // Validar roles para /usuarios
                     if (path.startsWith("/api/v1/usuarios")) {
                         if (!(user.getRol().getName().equalsIgnoreCase("ADMIN")
                                 || user.getRol().getName().equalsIgnoreCase("ASESOR"))) {
@@ -54,7 +52,6 @@ public class AuthWebFilter implements WebFilter {
                         }
                     }
 
-                    // continuar el flujo normal
                     return chain.filter(exchange);
                 })
                 .onErrorResume(e -> unauthorized(exchange, e.getMessage()));

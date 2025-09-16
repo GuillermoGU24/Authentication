@@ -1,0 +1,5 @@
+package co.com.crediya.api.dto;
+
+import java.util.List;
+
+public record DocumentsRequest(List<String> documents) {}
