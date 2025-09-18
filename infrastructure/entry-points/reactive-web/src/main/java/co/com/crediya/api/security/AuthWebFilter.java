@@ -1,5 +1,4 @@
-package co.com.crediya.api.security;// co.com.crediya.security.AuthWebFilter.java
-
+package co.com.crediya.api.security;
 
 import co.com.crediya.model.auth.AuthUser;
 import co.com.crediya.model.auth.gateways.TokenService;
@@ -23,42 +22,49 @@ public class AuthWebFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
+        log.debug("Incoming request to [{}]", path);
 
-        // Endpoints públicos
+        // Public endpoints
         if (path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-ui")
                 || path.equals("/swagger-ui.html")
                 || path.startsWith("/webjars/")
                 || path.startsWith("/api/v1/login")) {
+            log.trace("Skipping authentication for public endpoint [{}]", path);
             return chain.filter(exchange);
         }
 
-        // Header de autorización
+        // Authorization header
         String auth = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (auth == null || !auth.startsWith("Bearer ")) {
+            log.warn("Missing or invalid Authorization header for path [{}]", path);
             return unauthorized(exchange, "authorization: Missing Bearer token");
         }
 
         String token = auth.substring("Bearer ".length());
+        log.debug("Validating token for path [{}]", path);
 
         return tokenService.validate(token)
                 .flatMap(user -> {
+                    log.info("Token validated successfully for user [{}] with role [{}]", user.getEmail(), user.getRol().getName());
                     exchange.getAttributes().put("authUser", user);
 
                     if (path.startsWith("/api/v1/usuarios")) {
                         if (!(user.getRol().getName().equalsIgnoreCase("ADMIN")
                                 || user.getRol().getName().equalsIgnoreCase("ASESOR"))) {
+                            log.warn("Access denied for user [{}] with role [{}] to [{}]", user.getEmail(), user.getRol().getName(), path);
                             return forbidden(exchange, "forbidden: Requires ADMIN or ASESOR");
                         }
                     }
 
                     return chain.filter(exchange);
                 })
+                .doOnError(e -> log.error("Error validating token for path [{}]: {}", path, e.getMessage(), e))
                 .onErrorResume(e -> unauthorized(exchange, e.getMessage()));
     }
 
-
     private Mono<Void> unauthorized(ServerWebExchange ex, String msg) {
+        log.error("Unauthorized access: {}", msg);
         ex.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         ex.getResponse().getHeaders().setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 
@@ -70,8 +76,8 @@ public class AuthWebFilter implements WebFilter {
                 .wrap(bytes)));
     }
 
-
     private Mono<Void> forbidden(ServerWebExchange ex, String msg) {
+        log.error("Forbidden access: {}", msg);
         return Mono.error(new IllegalArgumentException(msg));
     }
 }
