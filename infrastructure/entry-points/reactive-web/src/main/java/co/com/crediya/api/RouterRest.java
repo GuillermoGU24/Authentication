@@ -1,6 +1,6 @@
 package co.com.crediya.api;
 
-
+import co.com.crediya.api.dto.DocumentsRequest;
 import co.com.crediya.api.dto.UserRequest;
 import co.com.crediya.api.dto.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,11 +22,13 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
-@Tag(name = "Usuarios", description = "Operaciones sobre usuarios")
+@Tag(name = "Usuarios", description = "Operations related to users")
 public class RouterRest {
 
     @Bean
     @RouterOperations({
+
+            // POST /api/v1/usuarios
             @RouterOperation(
                     path = "/api/v1/usuarios",
                     method = RequestMethod.POST,
@@ -44,7 +46,7 @@ public class RouterRest {
                             ),
                             responses = {
                                     @ApiResponse(
-                                            responseCode = "200",
+                                            responseCode = "201",
                                             description = "User successfully registered",
                                             content = @Content(
                                                     mediaType = "application/json",
@@ -58,7 +60,7 @@ public class RouterRest {
                                                     mediaType = "application/json",
                                                     examples = {
                                                             @ExampleObject(
-                                                                    name = "Error de validación",
+                                                                    name = "Validation error",
                                                                     value = "{\n" +
                                                                             "  \"status\": 400,\n" +
                                                                             "  \"error\": \"Validation failed\",\n" +
@@ -73,18 +75,69 @@ public class RouterRest {
                                     )
                             }
                     )
+            ),
 
+            // GET /api/v1/usuarios/document/{document}
+            @RouterOperation(
+                    path = "/api/v1/usuarios/document/{document}",
+                    method = RequestMethod.GET,
+                    operation = @Operation(
+                            operationId = "getUserByDocument",
+                            summary = "Get user by document",
+                            description = "Fetches a user based on their document number",
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "User found",
+                                            content = @Content(
+                                                    mediaType = "application/json",
+                                                    schema = @Schema(implementation = UserResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "404",
+                                            description = "User not found"
+                                    )
+                            }
+                    )
+            ),
+
+            // POST /api/v1/usuarios/documents
+            @RouterOperation(
+                    path = "/api/v1/usuarios/documents",
+                    method = RequestMethod.POST,
+                    operation = @Operation(
+                            operationId = "getUsersByDocuments",
+                            summary = "Get multiple users by documents",
+                            description = "Retrieves a list of users by their document numbers",
+                            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                    required = true,
+                                    description = "List of documents",
+                                    content = @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = DocumentsRequest.class)
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "List of users found",
+                                            content = @Content(
+                                                    mediaType = "application/json",
+                                                    schema = @Schema(implementation = UserResponse.class)
+                                            )
+                                    ),
+                                    @ApiResponse(
+                                            responseCode = "400",
+                                            description = "Invalid request data"
+                                    )
+                            }
+                    )
             )
-
     })
-
-
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/usuarios"), handler::listenSaveUser)
                 .andRoute(GET("/api/v1/usuarios/document/{document}"), handler::listenGetUserByDocument)
                 .andRoute(POST("/api/v1/usuarios/documents"), handler::listenGetUsersByDocuments);
-
     }
-
-
 }
