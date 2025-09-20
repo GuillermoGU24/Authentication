@@ -4,7 +4,7 @@ server:
 spring:
   application:
     name: "Authentication"
-  # opcional si quieres inicializar scripts .sql al arrancar
+
   sql:
     init:
       mode: always
@@ -27,12 +27,12 @@ cors:
 
 adapter:
   r2dbc:
-    host: "localhost"
-    port: 5432
-    database: "autenticacion_db"
+    host: ${DB_HOST:localhost}
+    port: ${DB_PORT:5432}
+    database: ${DB_NAME:authentication_db}
     schema: "public"
-    username: postgres
-    password: postgres
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:postgres}
 
 jwt:
   secret-base64: ${JWT_SECRET_BASE64:VGhpcy1pcy1hLWRlZmF1bHQtc2VjcmV0LWtleS1iYXNlNjQ=}
